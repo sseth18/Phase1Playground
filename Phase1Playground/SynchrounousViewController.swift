@@ -19,6 +19,14 @@ class SynchronousViewController: UIViewController {
     @IBOutlet weak var studentRoomInDorm: UILabel!
     @IBOutlet weak var dormLabel: UILabel!
     
+    // stack views
+    @IBOutlet weak var birthdateStackView: UIStackView!
+    @IBOutlet weak var studentIDStackView: UIStackView!
+    @IBOutlet weak var emailStack: UIStackView!
+    @IBOutlet weak var programStack: UIStackView!
+    @IBOutlet weak var clusterStack: UIStackView!
+    @IBOutlet weak var dormStack: UIStackView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -30,6 +38,13 @@ class SynchronousViewController: UIViewController {
             sleep(5)
             setSelectedStudent(to: 5)
         }
+        
+        birthdateStackView.isAccessibilityElement = true
+        studentIDStackView.isAccessibilityElement = true
+        emailStack.isAccessibilityElement = true
+        programStack.isAccessibilityElement = true
+        clusterStack.isAccessibilityElement = true
+        dormStack.isAccessibilityElement = true
     }
     
     func getSelectedStudent() -> Student {
@@ -69,10 +84,34 @@ class SynchronousViewController: UIViewController {
             if(getSelectedStudent().isDayStudent) {
                 studentRoomInDorm.text = ""
                 dormLabel.text = ""
+                dormStack.isAccessibilityElement = false
             } else {
-                studentRoomInDorm.text = "\(getSelectedStudent().dorm), # \(getSelectedStudent().roomNumber)"
+                let dorm = getSelectedStudent().dorm
+                let roomNumber = getSelectedStudent().roomNumber
+                
+                studentRoomInDorm.text = "\(dorm), # \(roomNumber)"
                 dormLabel.text = "Dorm:"
+                
+                dormStack.accessibilityLabel = "Dorm: " + dorm + " Room Number " + roomNumber
             }
+            if studentID >= 1 && studentID <= 4 {
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "MM-dd-yyyy"
+                let birthdate = dateFormatter.date(from: studentBirthdate.text!)
+                birthdateStackView.accessibilityLabel = "Birthdate: " + DateFormatter.localizedString(from: birthdate!, dateStyle: .medium, timeStyle: .none)
+                
+                emailStack.accessibilityLabel = "Email: " + String(studentEmail.text![studentEmail.text!.index(studentEmail.text!.startIndex, offsetBy: 0)]) + " "
+                let sliced = studentEmail.text!.suffix(studentEmail.text!.count - 1)
+                emailStack.accessibilityLabel = emailStack.accessibilityLabel! + sliced
+            } else {
+                birthdateStackView.accessibilityLabel = "Birthdate: "
+                emailStack.accessibilityLabel = "Email: "
+            }
+            
+            studentIDStackView.accessibilityLabel = "Student ID: " + self.studentID.text!
+            
+            programStack.accessibilityLabel = studentProgram.text! + " Program"
+            clusterStack.accessibilityLabel = studentCluster.text! + " Cluster"
         }
             
         @IBAction func changeStudentPressed(_ sender: UIButton) {
@@ -99,12 +138,15 @@ class SynchronousViewController: UIViewController {
                 UIAlertAction in
                 self.setSelectedStudent(to: 4)
             }
+            
+            let dismiss = UIAlertAction(title: "Dismiss", style: UIAlertAction.Style.cancel)
                 
             // Add the actions
             alert.addAction(student1Action)
             alert.addAction(student2Action)
             alert.addAction(student3Action)
             alert.addAction(student4Action)
+            alert.addAction(dismiss)
                 
             // Present the controller
             self.present(alert, animated: true, completion: nil)
